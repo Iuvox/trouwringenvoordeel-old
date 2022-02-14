@@ -1,0 +1,1 @@
+import{r as t,o,c as r,h as a,i as _}from"./vendor.fdf82635.js";const n=_("Ga naar referrals tool"),p={setup(s){return(c,l)=>{const e=t("router-link");return o(),r(e,{to:"/referral"},{default:a(()=>[n]),_:1})}}};export{p as default};
