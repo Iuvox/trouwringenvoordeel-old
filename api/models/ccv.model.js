@@ -1,37 +1,31 @@
-const axios = require('axios')
-const crypto = require('crypto')
+const ccvapi = require('../config/ccvapi')
+const logger = require('../config/logging')
+const { usedReferral, findusedReferral } = require('./referral.model')
 
-module.exports.findOrder = (req = {method: String, path: String, data:Object}) => {
-    
-    const utc = new Date(Date.now())
-    const month = utc.getUTCMonth() + 1    
-    const date = utc.getFullYear() + "-" + month.toLocaleString('nl-NL', {minimumIntegerDigits: 2}) + "-" + utc.getUTCDate().toLocaleString('nl-NL', {minimumIntegerDigits: 2}) + "T" + utc.getUTCHours() + ":" + utc.getUTCMinutes() + ":" + utc.getUTCSeconds().toLocaleString('nl-NL', {minimumIntegerDigits: 2}) + "+00:00" 
-    
-    const public = process.env.CCV_PUBLIC_KEY
-    
-    const hashString = [
-        public,
-        req.method,
-        req.path,
-        req.data,
-        date
-    ].join('|')
+module.exports.findOrder = (orderid) => {
+    return ccvapi.get(`/orders/${orderid}`)
 
-    const hash = crypto.createHmac('sha512', process.env.CCV_SECRET_KEY)
-        .update(hashString)
-        .digest('hex')
+}
 
-    const headers = {
-        'x-date': date,
-        'x-hash': hash,
-        'x-public': public
-    }
+module.exports.usedCodes = (code = String) => {
+    return new Promise( (resolve, reject) => {
+        findusedReferral(code).then(referrals => {
+            if (referrals.length === 0) {
+                return reject('not long enough')
+            }
+            const orders = []
+            for (let i = 0; i < referrals.length; i++) {
+                const referral = referrals[i];
+                this.findOrder(referral.order_number).then(res => {
+                    orders.push(res.data)
+                    if (i + 1 === referrals.length) {
+                        logger.debug('finished getting all orders')
+                        return resolve(orders)
+                    }
+                }).catch(err => logger.warn(`order number not found: ${referral.order_number}`))
+                
+            }
+        })
 
-    return axios({
-        url: `https://www.trouwringenvoordeel.nl${req.path}`,
-        method: req.method,
-        data: req.data,
-        headers: headers
     })
- 
 }

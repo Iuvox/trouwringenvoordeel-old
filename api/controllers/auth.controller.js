@@ -13,6 +13,13 @@ module.exports.login = (req, res) => {
 }
 
 module.exports.isLoggedin = (req, res, next) => {
+    if('api-token' in req.headers) {
+        if(req.headers['api-token'] ===  process.env.API_TOKEN) {
+            next()
+            return
+        }
+    }
+
     if('authorization' in req.headers) {
         const authorization = req.headers.authorization.split(' ')
         if(authorization[0] !== 'Bearer') {

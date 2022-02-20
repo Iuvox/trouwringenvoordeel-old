@@ -1,8 +1,8 @@
 const router = require('express').Router()
 const referral = require('../controllers/referral.controller')
 
-router.get('/:code', referral.check) 
+router.get('/:code', referral.list) 
 
-// console.log( (Math.round(Date.now())).toString(36))
+router.post('/', referral.create)
 
 module.exports = router 

@@ -17,11 +17,16 @@ export const useMain =  defineStore('main', {
     },
     actions: {
         login() {
-            api.post('/auth/login', {
-                name: 'Joep',
-                password: 'test'
-            }).then(res => {
-                this.auth = res.data
+            return new Promise((resolve, reject) => {
+                api.post('/auth/login', {
+                    name: 'Joep',
+                    password: 'test'
+                }).then(res => {
+                    this.auth = res.data
+                    resolve(true)
+                }).catch(err => {
+                    reject(false)
+                })
             })
         }
     },

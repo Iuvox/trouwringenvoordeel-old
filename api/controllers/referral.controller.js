@@ -1,24 +1,38 @@
 const referral = require('../models/referral.model')
 const ccv = require('../models/ccv.model')
 
-module.exports.check = (req, res) => {
-    
-    referral.findCode(req.params.code, async (err, result) => {
+module.exports.list = (req, res) => {
+
+    referral.checkCode(req.params.code).then(async result => {
         const message = {}
         message.code = req.params.code
-        if(result.length === 0) {
+        if (result.length === 0) {
             message.error = 'NOT_FOUND'
         }
-        const order = await ccv.findOrder({
-            method: "GET",
-            path: `/api/rest/v1/orders/?ordernumber=${result[0].order_number}`,
-            data: null
+        const order = await ccv.findOrder(result[0].order_number).catch(err => { console.log(err) })
+
+
+
+        ccv.usedCodes(message.code).then(usedOrders => {
+
+            res.send({
+                ...message,
+                ...result[0],
+                usedOrders: usedOrders,
+                order: order.data
+            })
         })
-        res.send({
-            ...message,
-            ...result[0],
-            order: order.data.items
-        })
+
     })
 
+}
+
+module.exports.create = (req, res) => {
+    const code = (Math.round(Date.now())).toString(36)
+    const insert = {
+        order_number: req.body.ordernumber_full,
+        code: code
+    }
+
+    res.send(insert)
 }
