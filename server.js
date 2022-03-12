@@ -5,9 +5,9 @@ const prod = (process.env.NODE_ENV === 'production')
 
 const app = express()
 const router = express.Router()
-const { dirname } = require('path');
+const { resolve } = require('path');
 const logger = require('./api/config/logging')
-const appDir = dirname(require.main.filename);
+
 
 // parse requests of content-type - application/json
 app.use(express.json());
@@ -36,12 +36,14 @@ const port = process.env.PORT || 8080
 
 app.use('/api', router)
 
-if(prod) {
-    const path = appDir + '/tools/dist/'
 
-    app.use(express.static(path))
+
+if(prod) {
+    const toolsDir = resolve('./tools/dist')
+    
+    app.use(express.static(toolsDir))
     app.get('*', (req, res) => {
-        res.sendFile(path + '/index.html')
+        res.sendFile(toolsDir + '/index.html')
     })
 }
 

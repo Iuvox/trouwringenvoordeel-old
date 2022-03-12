@@ -26,13 +26,14 @@ module.exports.handleOrder = async(req, res) => {
     if(order.data.customer.reference !== '') {
         logger.info(`customer used reference: ${JSON.stringify(order.data.customer.reference)}`)
         codeObj.usedReference = order.data.customer.reference
-        referral.usedReferral({order_number: order.data.id, code: code.code}).catch(err => logger.warn(`insert of used referral didn't work: ${JSON.stringify(err)}`))
+        referral.usedReferral({order_number: order.data.id, code: code.code}).catch(err => logger.warn(`insert of used referral didn't work. Probably webhook order is multiple times emitted: ${JSON.stringify(err)}`))
     }
 
 
 
     logger.debug(JSON.stringify(codeObj))
-    setCode('joep@mercesmarketing.nl', codeObj).then(resp => {
+
+    setCode(req.body.customer_email, codeObj).then(resp => {
         res.send({
             insert: code,
             data: resp.data,
@@ -66,4 +67,36 @@ module.exports.checkreferral = (req, res) => {
         .catch(err => {
             res.send(err)
         })
+}
+
+module.exports.getActiveWebhooksCCV = async (req, res) => {
+    const webhooks = await ccvapi.get('/webhooks?size=150')
+    logger.debug('Got all webhooks')
+    res.send(webhooks.data)
+}
+
+module.exports.createWebhookCCV = (req, res) => {
+    ccvapi.post('/webhooks', {
+        ...req.body,
+        is_active: true
+    }).then(result => {
+        res.send(result)
+        logger.debug('Added Webhook')
+    }).catch(err => {
+        logger.warn('Added Webhook failed')
+        res.status(500).send(err.data)
+    })
+}
+
+module.exports.updateWebhookCCV = (req, res) => {
+    ccvapi.patch(`/webhooks/${req.params.id}`, {
+        address: req.body.address,
+        is_active: req.body.is_active
+    }).then(result => {
+        res.send(result.data)
+        logger.debug('Updated Webhook')
+    }).catch(err => {
+        logger.warn('Update Webhook failed')
+        res.status(500).send(err.data)
+    })
 }

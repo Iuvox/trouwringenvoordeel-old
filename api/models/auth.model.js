@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken')
+const logger = require('../config/logging')
 
 module.exports.login = (auth = { name: String, password: String }, callback) => {
 
@@ -14,7 +15,9 @@ module.exports.login = (auth = { name: String, password: String }, callback) => 
             expiresIn: '2h'
         }
     )
-    console.log(token)
+    const currentTime = new Date()
+    
+    logger.info(`token issued at ${currentTime.toISOString().toString()}`)
     callback(token)
 }
 

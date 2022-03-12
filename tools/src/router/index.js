@@ -18,6 +18,11 @@ const router = createRouter({
                 import ('/src/views/ReferralView.vue')
         },
         {
+            name: 'Webhooks',
+            path: '/webhooks',
+            component: () => import('/src/views/WebhookView.vue')
+        },
+        {
             name: 'Login',
             path: '/login',
             component: () =>

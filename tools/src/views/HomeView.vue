@@ -5,16 +5,12 @@
 </script>
 
 <template>
-<router-link to="/referral">Ga naar referrals tool</router-link>
+    <div class="px-40 py-10">
+        <ul class="list-disc"> 
+            <li><router-link to="/referral">Ga naar referrals tool ></router-link></li>
+            <li><router-link to="/webhooks">Check alle webhooks ></router-link></li>
+        </ul>
+    </div>
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-</style>
  
